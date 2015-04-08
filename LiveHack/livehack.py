@@ -27,14 +27,15 @@ __init__.py
 
 """
 
-#import Live
-#import LiveUtils
+import Live
+import LiveUtils
 import sys
 #from Logger import log
 from udpio import UDPOut
 
 # Import correct paths for os / version
-version = 9#Live.Application.get_application().get_major_version()
+version = 9
+version = Live.Application.get_application().get_major_version()
 if sys.platform == "win32":
 	import socket   
 
@@ -60,7 +61,7 @@ class LiveHack:
 		self.backerr = sys.stderr
 		self.udpout = UDPOut("localhost", 9001)
 		sys.stdout = self.udpout
-		#sys.stderr = self.udpout
+		sys.stderr = self.udpout
 		self._LiveHack__c_instance = c_instance
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.socket.setblocking(0)

@@ -7,8 +7,8 @@ class Console(QPlainTextEdit):
 	newLine = pyqtSignal(str)
 	#suppressedKeys = [Qt.Key_Backspace, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up,
 		#			Qt.Key_Down]
-	suppressedKeys = [Qt.Key_Up, Qt.Key_Down]
-	specialKeys = [Qt.Key_Backspace, Qt.Key_Return]
+	suppressedKeys = []
+	specialKeys = [Qt.Key_Backspace, Qt.Key_Return, Qt.Key_Left, Qt.Key_Up, Qt.Key_Down]
 					
 	def __init__(self, parent = None):
 		super(Console, self).__init__(parent)
@@ -24,6 +24,8 @@ class Console(QPlainTextEdit):
 		self.charWidth = self.fm.width("a")
 		font.setPixelSize(12)
 		doc.setDefaultFont(font)
+		self.cmdHistory = []
+		self.cmdHistoryPos = 0
 		
 	def putData(self, data):
 		self.insertPlainText(str(data))
@@ -38,20 +40,40 @@ class Console(QPlainTextEdit):
 		for i in range(indent * 4):
 			self.putData(" ")
 		
-
+	def isPromptLine(self, line): 
+		return line[:3] == ">>>" or line[:3] == "..."
+		
 	def keyPressEvent(self, e):
 		key = e.key()
 		if key in self.suppressedKeys:
 			return
 		if key in self.specialKeys:
 			if key == Qt.Key_Return:
-				cline = self.textCursor().block().text() 
-				self.newLine.emit(cline[4:])
+				cline = self.textCursor().block().text()
+				self.newLine.emit(cline)
 			elif key == Qt.Key_Backspace:
+				cline = self.textCursor().block().text() 
 				rect = self.cursorRect()
-				promptLen = int(rect.x() / self.charWidth)
-				if promptLen > 4:
+				cPos = int(rect.x() / self.charWidth)
+				if self.isPromptLine(cline) and cPos > 4:
 					super(Console, self).keyPressEvent(e)
-				
+			elif key == Qt.Key_Left:
+				cline = self.textCursor().block().text()
+				rect = self.cursorRect()
+				cPos = int(rect.x() / self.charWidth)
+				if self.isPromptLine(cline) and cPos > 4: 
+					super(Console, self).keyPressEvent(e)
+			elif key == Qt.Key_Up:
+				if len(self.cmdHistory) == 0:
+					return
+				cmd = self.cmdHistory[self.cmdHistoryPos]
+				self.lastHistoryCmdLen = len(cmd)
+				self.putData(self.cmdHistory[self.cmdHistoryPos])
+				self.cmdHistoryPos -= 1
+				if self.cmdHistoryPos < 0:
+					self.cmdHistoryPos = 0
 		else:
 			super(Console, self).keyPressEvent(e)
+			
+	def addToCmdHistory(self, cmd):
+		self.cmdHistory += [cmd]

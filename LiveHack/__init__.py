@@ -19,8 +19,8 @@
 # Nathan Ramella <nar@remix.net> or visit http://www.liveapi.org
 """
 
-#import sys
-#import Live
+import sys
+import Live
     
 #path = "/Users/ST8/Production/Arduinome/Dev/LiveOSC"
 #errorLog = open(path + "/stderr.txt", "w")
@@ -30,7 +30,7 @@
 #stdoutLog.write("Starting Standard Out Log")
 #sys.stdout = stdoutLog
 
-from LiveHack import LiveHack
+from livehack import LiveHack
 
 def create_instance(c_instance):
     return LiveHack(c_instance)

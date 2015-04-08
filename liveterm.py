@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
 		super(MainWindow, self).__init__(parent)
 		#icon = QIcon("logo.png")
 		#self.setWindowIcon(icon)
-		self.setWindowTitle("LiveHack v0.1")
+		self.setWindowTitle("LiveHack by nAkoustix v0.1")
 		
 		self.console = Console(self)
 		self.lay = QGridLayout()
@@ -44,7 +44,13 @@ class MainWindow(QMainWindow):
 		self.console.makePrompt()
 		
 	def interpretLine(self, line):
+		if line[:3] != ">>>" and line[:3] != "...":
+			self.console.putData("\n")
+			self.console.makePrompt()
+			return
+		line = line[4:]
 		self.buffer += [line]
+		self.console.addToCmdHistory(line)
 		if line[-1:] == ":":
 			self.console.putData("\n")
 			self.indentation += 1
