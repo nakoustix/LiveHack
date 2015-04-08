@@ -28,25 +28,58 @@ class MainWindow(QMainWindow):
 		self.localAddr = ("localhost", 9001)
 		self.socket.bind(self.localAddr)
 		
+		self.socksend = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.remoteAddr = ("localhost", 9000)
+		
+		self.buffer = []
+		self.indentation = 0
+		
 		self.readTimer = QTimer(self)
 		self.readTimer.timeout.connect(self.readData)
 		
-		self.console.getData.connect(self.writeData)
+		self.console.newLine.connect(self.interpretLine)
 		
 		self.readTimer.start(50)
 		
 		self.console.makePrompt()
 		
-	def writeData(self, data):
-		pass
+	def interpretLine(self, line):
+		self.buffer += [line]
+		if line[-1:] == ":":
+			self.console.putData("\n")
+			self.indentation += 1
+			self.console.makeExtendedPrompt(self.indentation)
+		else:
+			self.console.putData("\n")
+			if self.indentation == 0:
+				self.execute()
+				self.console.makePrompt()
+			else:
+				self.indentation = 0
+				self.console.makeExtendedPrompt(self.indentation)
+				
+	def execute(self):
+		s = ""
+		for line in self.buffer:
+			s += line + "\n"
+		# check if there is anything
+		if len(self.buffer) == 1 and self.buffer[0] == "":
+			pass
+		else:
+			#print(s)
+			self.socksend.sendto(bytes(s, "utf-8"), self.remoteAddr)
+			self.socksend.sendto("execute".encode("utf-8"), self.remoteAddr)
+		self.buffer = []
 		
 	def readData(self):
 		try:
 			while 1:
 				self.data, self.addr = self.socket.recvfrom(65536)
 				decoded = self.data.decode()
-				print(decoded)
-				self.console.putData(decoded)
+				#print(decoded)
+				if decoded != "" and decoded != "\n":
+					self.console.putData("\n")
+					self.console.putData(decoded)
 
 		except Exception as e:
 			pass

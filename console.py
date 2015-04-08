@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QByteArray
 from PyQt5.QtGui import QPalette, QFontMetrics
 
 class Console(QPlainTextEdit):
-	getData = pyqtSignal(QByteArray)
+	newLine = pyqtSignal(str)
 	#suppressedKeys = [Qt.Key_Backspace, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up,
 		#			Qt.Key_Down]
 	suppressedKeys = [Qt.Key_Up, Qt.Key_Down]
@@ -32,6 +32,12 @@ class Console(QPlainTextEdit):
 		
 	def makePrompt(self):
 		self.putData(">>> ")
+		
+	def makeExtendedPrompt(self, indent):
+		self.putData("... ")
+		for i in range(indent * 4):
+			self.putData(" ")
+		
 
 	def keyPressEvent(self, e):
 		key = e.key()
@@ -39,7 +45,8 @@ class Console(QPlainTextEdit):
 			return
 		if key in self.specialKeys:
 			if key == Qt.Key_Return:
-				pass
+				cline = self.textCursor().block().text() 
+				self.newLine.emit(cline[4:])
 			elif key == Qt.Key_Backspace:
 				rect = self.cursorRect()
 				promptLen = int(rect.x() / self.charWidth)
@@ -48,4 +55,3 @@ class Console(QPlainTextEdit):
 				
 		else:
 			super(Console, self).keyPressEvent(e)
-			self.getData.emit(e.text())
