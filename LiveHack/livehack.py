@@ -75,13 +75,13 @@ class LiveHack:
 		self.bufferPos = 0
 		self.fastUpdate = False    
         
-		#self.log_message("LiveHack initialized")
         debug("LiveHack initialized")
-        #log("LiveHack initialized")
         
         
+	def build_midi_map(self, igwas):
+		pass
+		
 	def processIncomingUDP(self):
-		#self.log_message("processIncomingUDP")
 		#debug("processIncomingUDP")
 		execute = False
 		try:
@@ -90,16 +90,20 @@ class LiveHack:
 				decoded = self.data.decode()
 				#self.log_message("data incoming!")
 				#debug("Data incoming!")
-				if len(decoded) == 7 and "execute" in decoded:
-					execute = True
-					self.buffer += [""]
-					self.bufferComplete += [False]
-					self.bufferComplete[self.bufferPos] = True
-					self.bufferPos += 1
-				elif len(decoded) == 5 and "clear" in decoded:
-					self.buffer = [""]
-					self.bufferComplete = [False]
-					self.bufferPos = 0
+				if decoded[:1] == "!":
+					#debug("Escape char!")
+					if "execute" in decoded:
+						#print("execute!")
+						execute = True
+						self.buffer += [""]
+						self.bufferComplete += [False]
+						self.bufferComplete[self.bufferPos] = True
+						self.bufferPos += 1
+					elif "clear" in decoded:
+						self.clear()
+					elif "knock" in decoded:
+						print("\\0/ - Server says:\t\"Hi mate! Sure, the door is open! You're welcome! ;)\"")
+						self.clear()
 				else:
 					self.buffer[self.bufferPos] += decoded
 
@@ -108,6 +112,11 @@ class LiveHack:
 			
 		if execute:
 			self.execute()
+			
+	def clear(self):
+		self.buffer = [""]
+		self.bufferComplete = [False]
+		self.bufferPos = 0
 			
 	def testInput(self, data):
 		execute = False

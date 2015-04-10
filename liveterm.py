@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
 			print("Escape char!")
 			if line == "knock":
 				print("knock, knock, knocking on Liiives door...")
-				self.console.putData("\n\\0/ - Client says:\tKnock knock.. Hi Live! may I come in?")
+				self.console.putData("\n\\0/ - Client says:\t\"Knock knock.. Hi Live! may I come in?\"")
 				self.socksend.sendto("!knock".encode("utf-8"), self.remoteAddr)
 			if line == "clear":
 				self.socksend.sendto("!clear".encode("utf-8"), self.remoteAddr)
