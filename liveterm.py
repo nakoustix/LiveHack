@@ -57,12 +57,22 @@ class MainWindow(QMainWindow):
 			self.console.makePrompt()
 			return
 		line = line[4:]
+		if line[:1] == "!":
+			line = line[1:]
+			print("Escape char!")
+			if line == "knock":
+				print("knock, knock, knocking on Liiives door...")
+				self.console.putData("\n\\0/ - Client says:\tKnock knock.. Hi Live! may I come in?")
+				self.socksend.sendto("!knock".encode("utf-8"), self.remoteAddr)
+			if line == "clear":
+				self.socksend.sendto("!clear".encode("utf-8"), self.remoteAddr)
+			elif line == "exit":
+				print("Exit requested")
+			self.clear()
+			return
 		self.buffer += [line]
-		self.console.addToCmdHistory(line)
-		if line == "clear":
-			self.socksend.sendto("clear".encode("utf-8"), self.remoteAddr)
-		elif line == "exit":
-			print("Exit requested")
+		#self.console.addToCmdHistory(line)
+#------ Editor behaviour ------------------
 		if line[-1:] == ":":
 			self.console.putData("\n")
 			self.indentation += 1
@@ -87,6 +97,9 @@ class MainWindow(QMainWindow):
 				else:
 					#debug("4");
 					self.console.makeExtendedPrompt(self.indentation)
+	def clear(self):
+		self.indentation = 0;
+		self.buffer = []
 				
 	def execute(self):
 		print("execute")
@@ -99,8 +112,8 @@ class MainWindow(QMainWindow):
 		else:
 			print(s)
 			self.socksend.sendto(bytes(s, "utf-8"), self.remoteAddr)
-			self.socksend.sendto("execute".encode("utf-8"), self.remoteAddr)
-		self.buffer = []
+			self.socksend.sendto("!execute".encode("utf-8"), self.remoteAddr)
+		self.clear()
 		
 	def readData(self):
 		try:
