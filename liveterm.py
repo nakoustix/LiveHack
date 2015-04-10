@@ -2,8 +2,8 @@ import sys
 from io import StringIO
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QGridLayout, QWidget
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot
+from PyQt5.QtGui import QIcon, QPalette
+from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot, Qt
 from console import Console
 import socket
 from PyQt5.QtCore import QCoreApplication
@@ -16,6 +16,12 @@ class MainWindow(QMainWindow):
 		#icon = QIcon("logo.png")
 		#self.setWindowIcon(icon)
 		self.setWindowTitle("LiveHack by nAkoustix v0.1")
+		
+		#pal = self.palette()
+		#pal.setColor(QPalette.Base, Qt.black)
+		#pal.setColor(QPalette.Text, Qt.green)
+		#self.setPalette(pal)
+		#self.setAutoFillBackground(True)
 		
 		self.console = Console(self)
 		self.lay = QGridLayout()
@@ -67,7 +73,7 @@ class MainWindow(QMainWindow):
 				print("knock, knock, knocking on Liiives door...")
 				self.console.putData("\n\\0/ - Client says:\t\"Knock knock.. Hi Live! may I come in?\"")
 				self.socksend.sendto("!knock".encode("utf-8"), self.remoteAddr)
-			if line == "clear":
+			elif line == "clear":
 				self.socksend.sendto("!clear".encode("utf-8"), self.remoteAddr)
 				self.clear()
 				self.console.clear()
@@ -151,7 +157,7 @@ def main():
 	w = MainWindow()
     #w.resize(1000, 900)
     
-	w.setGeometry(500,300,800,500)
+	w.setGeometry(500,300,700,400)
 	w.show()
     
 	sys.exit(app.exec_())

@@ -30,6 +30,7 @@ class Console(QPlainTextEdit):
 		self.cmdHistory = []
 		self.cmdHistoryPos = 0
 		self.spaceCount = 0
+		self.backSpaceCount = 0
 		
 	def clear(self):
 		self.document().clear()
@@ -53,6 +54,7 @@ class Console(QPlainTextEdit):
 		
 	def keyPressEvent(self, e):
 		key = e.key()
+		backSpace = False
 		if key in self.suppressedKeys:
 			return
 		if key in self.specialKeys:
@@ -63,8 +65,14 @@ class Console(QPlainTextEdit):
 				cline = self.textCursor().block().text() 
 				rect = self.cursorRect()
 				cPos = int(rect.x() / self.charWidth)
+				self.backSpaceCount += 1
+				backSpace = True
+				if self.backSpaceCount >= 4:
+					self.backSpaceCount = 0
+					self.indentationMinus.emit()
 				if self.isPromptLine(cline) and cPos > 4:
 					super(Console, self).keyPressEvent(e)
+					
 			elif key == Qt.Key_Tab:
 				self.indentationPlus.emit()
 				self.putData("    ")
@@ -93,6 +101,8 @@ class Console(QPlainTextEdit):
 				self.spaceCount = 0
 		else:
 			super(Console, self).keyPressEvent(e)
+		if not backSpace:
+			self.backSpaceCount = 0
 			
 	def addToCmdHistory(self, cmd):
 		self.cmdHistory += [cmd]
