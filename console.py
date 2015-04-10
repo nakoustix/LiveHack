@@ -55,6 +55,7 @@ class Console(QPlainTextEdit):
 	def keyPressEvent(self, e):
 		key = e.key()
 		backSpace = False
+		space = False
 		if key in self.suppressedKeys:
 			return
 		if key in self.specialKeys:
@@ -92,6 +93,7 @@ class Console(QPlainTextEdit):
 				if self.cmdHistoryPos < 0:
 					self.cmdHistoryPos = 0
 			if key == Qt.Key_Space:
+				space = True
 				super(Console, self).keyPressEvent(e)
 				self.spaceCount += 1
 				if self.spaceCount >= 4:
@@ -103,6 +105,8 @@ class Console(QPlainTextEdit):
 			super(Console, self).keyPressEvent(e)
 		if not backSpace:
 			self.backSpaceCount = 0
+		if not space:
+			self.spaceCount = 0
 			
 	def addToCmdHistory(self, cmd):
 		self.cmdHistory += [cmd]
