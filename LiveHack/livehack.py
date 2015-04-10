@@ -28,10 +28,13 @@ __init__.py
 """
 
 import Live
-import LiveUtils
+#import LiveUtils
 import sys
+
 #from Logger import log
 from udpio import UDPOut
+
+from logger import debug
 
 # Import correct paths for os / version
 version = 9
@@ -72,25 +75,35 @@ class LiveHack:
 		self.bufferPos = 0
 		self.fastUpdate = False    
         
+		#self.log_message("LiveHack initialized")
+        debug("LiveHack initialized")
         #log("LiveHack initialized")
         
         
 	def processIncomingUDP(self):
+		#self.log_message("processIncomingUDP")
+		#debug("processIncomingUDP")
 		execute = False
 		try:
 			while 1:
 				self.data, self.addr = self.socket.recvfrom(65536)
 				decoded = self.data.decode()
+				#self.log_message("data incoming!")
+				#debug("Data incoming!")
 				if len(decoded) == 7 and "execute" in decoded:
 					execute = True
 					self.buffer += [""]
 					self.bufferComplete += [False]
 					self.bufferComplete[self.bufferPos] = True
 					self.bufferPos += 1
+				elif len(decoded) == 5 and "clear" in decoded:
+					self.buffer = [""]
+					self.bufferComplete = [False]
+					self.bufferPos = 0
 				else:
 					self.buffer[self.bufferPos] += decoded
 
-		except Exception as e:
+		except:
 			pass
 			
 		if execute:
@@ -141,7 +154,7 @@ class LiveHack:
 			try:
 				doc = self.song()
 			except:
-				log('could not get song handle')
+				#log('could not get song handle')
 				return
 			try:
 				self.time = 0

@@ -38,10 +38,18 @@ class MainWindow(QMainWindow):
 		self.readTimer.timeout.connect(self.readData)
 		
 		self.console.newLine.connect(self.interpretLine)
+		self.console.indentationPlus.connect(self.indentPlus)
+		self.console.indentationMinus.connect(self.indentMinus)
 		
 		self.readTimer.start(50)
 		
 		self.console.makePrompt()
+		
+	def indentPlus(self):
+		self.indentation += 1
+		
+	def indentMinus(self):
+		self.indentation -= 1
 		
 	def interpretLine(self, line):
 		if line[:3] != ">>>" and line[:3] != "...":
@@ -51,28 +59,45 @@ class MainWindow(QMainWindow):
 		line = line[4:]
 		self.buffer += [line]
 		self.console.addToCmdHistory(line)
+		if line == "clear":
+			self.socksend.sendto("clear".encode("utf-8"), self.remoteAddr)
+		elif line == "exit":
+			print("Exit requested")
 		if line[-1:] == ":":
 			self.console.putData("\n")
 			self.indentation += 1
 			self.console.makeExtendedPrompt(self.indentation)
+			print(": found")
+			print("line")
+			#debug("1");
 		else:
 			self.console.putData("\n")
 			if self.indentation == 0:
 				self.execute()
 				self.console.makePrompt()
+				#debug("2");
 			else:
-				self.indentation = 0
-				self.console.makeExtendedPrompt(self.indentation)
+				#self.indentation = 0
+				stripped = line.replace(" ", "")
+				if len(stripped) == 0:
+					self.indentation = 0
+					self.execute()
+					self.console.makePrompt()
+					#debug("3");
+				else:
+					#debug("4");
+					self.console.makeExtendedPrompt(self.indentation)
 				
 	def execute(self):
+		print("execute")
 		s = ""
 		for line in self.buffer:
 			s += line + "\n"
 		# check if there is anything
-		if len(self.buffer) == 1 and self.buffer[0] == "":
-			pass
+		if len(s.replace("\n", "")) == 0:
+			print("execution aborted")
 		else:
-			#print(s)
+			print(s)
 			self.socksend.sendto(bytes(s, "utf-8"), self.remoteAddr)
 			self.socksend.sendto("execute".encode("utf-8"), self.remoteAddr)
 		self.buffer = []
@@ -99,7 +124,7 @@ def main():
 	w = MainWindow()
     #w.resize(1000, 900)
     
-	w.setGeometry(700,300,800,500)
+	w.setGeometry(500,300,800,500)
 	w.show()
     
 	sys.exit(app.exec_())

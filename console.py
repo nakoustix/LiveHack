@@ -5,10 +5,13 @@ from PyQt5.QtGui import QPalette, QFontMetrics
 
 class Console(QPlainTextEdit):
 	newLine = pyqtSignal(str)
+	indentationPlus = pyqtSignal()
+	indentationMinus = pyqtSignal()
 	#suppressedKeys = [Qt.Key_Backspace, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up,
 		#			Qt.Key_Down]
 	suppressedKeys = []
-	specialKeys = [Qt.Key_Backspace, Qt.Key_Return, Qt.Key_Left, Qt.Key_Up, Qt.Key_Down]
+	specialKeys = [Qt.Key_Backspace, Qt.Key_Return, Qt.Key_Left, Qt.Key_Up, Qt.Key_Down, 
+				Qt.Key_Tab, Qt.Key_Space]
 					
 	def __init__(self, parent = None):
 		super(Console, self).__init__(parent)
@@ -26,6 +29,7 @@ class Console(QPlainTextEdit):
 		doc.setDefaultFont(font)
 		self.cmdHistory = []
 		self.cmdHistoryPos = 0
+		self.spaceCount = 0
 		
 	def putData(self, data):
 		self.insertPlainText(str(data))
@@ -57,6 +61,9 @@ class Console(QPlainTextEdit):
 				cPos = int(rect.x() / self.charWidth)
 				if self.isPromptLine(cline) and cPos > 4:
 					super(Console, self).keyPressEvent(e)
+			elif key == Qt.Key_Tab:
+				self.indentationPlus.emit()
+				self.putData("    ")
 			elif key == Qt.Key_Left:
 				cline = self.textCursor().block().text()
 				rect = self.cursorRect()
@@ -72,6 +79,14 @@ class Console(QPlainTextEdit):
 				self.cmdHistoryPos -= 1
 				if self.cmdHistoryPos < 0:
 					self.cmdHistoryPos = 0
+			if key == Qt.Key_Space:
+				super(Console, self).keyPressEvent(e)
+				self.spaceCount += 1
+				if self.spaceCount >= 4:
+					self.spaceCount = 0
+					self.indentationPlus.emit()
+			else:
+				self.spaceCount = 0
 		else:
 			super(Console, self).keyPressEvent(e)
 			
