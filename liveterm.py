@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
 		line = line[4:]
 		if line[:1] == "!":
 			line = line[1:]
+#-- Escape chars ----------------------
 			print("Escape char!")
 			if line == "knock":
 				print("knock, knock, knocking on Liiives door...")
@@ -66,13 +67,15 @@ class MainWindow(QMainWindow):
 				self.socksend.sendto("!knock".encode("utf-8"), self.remoteAddr)
 			if line == "clear":
 				self.socksend.sendto("!clear".encode("utf-8"), self.remoteAddr)
+				self.clear()
+				self.console.clear()
 			elif line == "exit":
 				print("Exit requested")
 			self.clear()
 			return
 		self.buffer += [line]
 		#self.console.addToCmdHistory(line)
-#------ Editor behaviour ------------------
+#-- Editor behaviour ------------------
 		if line[-1:] == ":":
 			self.console.putData("\n")
 			self.indentation += 1

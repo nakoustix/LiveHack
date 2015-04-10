@@ -31,6 +31,10 @@ class Console(QPlainTextEdit):
 		self.cmdHistoryPos = 0
 		self.spaceCount = 0
 		
+	def clear(self):
+		self.document().clear()
+		self.makePrompt()
+		
 	def putData(self, data):
 		self.insertPlainText(str(data))
 		bar = self.verticalScrollBar()
