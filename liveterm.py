@@ -6,6 +6,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer, pyqtSignal, pyqtSlot
 from console import Console
 import socket
+from PyQt5.QtCore import QCoreApplication
+from time import sleep
 
 class MainWindow(QMainWindow):
     
@@ -70,7 +72,16 @@ class MainWindow(QMainWindow):
 				self.clear()
 				self.console.clear()
 			elif line == "exit":
-				print("Exit requested")
+				print("Bye!!")
+				self.exitTimer = QTimer(self)
+				self.console.putData("\nBye!!")
+				#self.exitTimer.timeout.connect(QCoreApplication.instance.quit)
+				self.exitTimer.timeout.connect(self.close)
+				self.exitTimer.start(800)
+				#QCoreApplication.instance().quit()
+			else:
+				self.console.putData("\nUnknown escape sequence!")
+				self.makePrompt()
 			self.clear()
 			return
 		self.buffer += [line]
