@@ -54,9 +54,11 @@ class MainWindow(QMainWindow):
 		self.console.makePrompt()
 		
 	def indentPlus(self):
+		print("indent +")
 		self.indentation += 1
 		
 	def indentMinus(self):
+		print("indent -")
 		self.indentation -= 1
 		
 	def interpretLine(self, line):
@@ -123,6 +125,7 @@ class MainWindow(QMainWindow):
 				
 	def execute(self):
 		print("execute")
+		print(self.indentation)
 		s = ""
 		for line in self.buffer:
 			s += line + "\n"

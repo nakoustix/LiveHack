@@ -52,6 +52,9 @@ class Console(QPlainTextEdit):
 	def isPromptLine(self, line): 
 		return line[:3] == ">>>" or line[:3] == "..."
 		
+	def currentLine(self):
+		return self.textCursor().block().text()
+		
 	def keyPressEvent(self, e):
 		key = e.key()
 		backSpace = False
@@ -60,17 +63,18 @@ class Console(QPlainTextEdit):
 			return
 		if key in self.specialKeys:
 			if key == Qt.Key_Return:
-				cline = self.textCursor().block().text()
-				self.newLine.emit(cline)
+				self.newLine.emit(self.currentLine())
 			elif key == Qt.Key_Backspace:
-				cline = self.textCursor().block().text() 
+				cline = self.currentLine()
 				rect = self.cursorRect()
 				cPos = int(rect.x() / self.charWidth)
-				self.backSpaceCount += 1
-				backSpace = True
-				if self.backSpaceCount >= 4:
-					self.backSpaceCount = 0
-					self.indentationMinus.emit()
+				if cline[-1:] == " ":
+					self.backSpaceCount += 1
+					backSpace = True
+					if self.backSpaceCount >= 4:
+						self.backSpaceCount = 0
+						self.indentationMinus.emit()
+				#Execute it if its in command line
 				if self.isPromptLine(cline) and cPos > 4:
 					super(Console, self).keyPressEvent(e)
 					
@@ -78,7 +82,7 @@ class Console(QPlainTextEdit):
 				self.indentationPlus.emit()
 				self.putData("    ")
 			elif key == Qt.Key_Left:
-				cline = self.textCursor().block().text()
+				cline = self.currentLine()
 				rect = self.cursorRect()
 				cPos = int(rect.x() / self.charWidth)
 				if self.isPromptLine(cline) and cPos > 4: 
@@ -90,17 +94,16 @@ class Console(QPlainTextEdit):
 				self.lastHistoryCmdLen = len(cmd)
 				self.putData(self.cmdHistory[self.cmdHistoryPos])
 				self.cmdHistoryPos -= 1
-				if self.cmdHistoryPos < 0:
-					self.cmdHistoryPos = 0
-			if key == Qt.Key_Space:
+				# if self.cmdHistoryPos < 0:
+				self.cmdHistoryPos = 0
+			elif key == Qt.Key_Space:
 				space = True
 				super(Console, self).keyPressEvent(e)
 				self.spaceCount += 1
 				if self.spaceCount >= 4:
 					self.spaceCount = 0
 					self.indentationPlus.emit()
-			else:
-				self.spaceCount = 0
+			
 		else:
 			super(Console, self).keyPressEvent(e)
 		if not backSpace:
